@@ -34,11 +34,15 @@ class HomeController extends Controller
             $userRemainingCount = max(0, $book->book_laws_count - $userReadsCount);
 
             // Check purchase existence (optimized exists query)
-            $isPurchased = UserPurchase::where([
-                ['user_id', $userId],
-                ['book_id', $book->id],
-                ['payment_status', 'paid'],
-            ])->exists();
+            $isPurchased = UserPurchase::where('user_id', $userId)
+                ->where('book_id', null)
+                ->where('payment_status', 'paid')
+                ->exists();
+            // $isPurchased = UserPurchase::where([
+            //     ['user_id', $userId],
+            //     ['book_id', $book->id],
+            //     ['payment_status', 'paid'],
+            // ])->exists();
 
             // If purchased → random from all laws
             if ($isPurchased) {
