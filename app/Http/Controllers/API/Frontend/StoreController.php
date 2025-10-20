@@ -23,7 +23,7 @@ class StoreController extends Controller
 
             // Check if purchased
             $isPurchased = UserPurchase::where('user_id', $user->id)
-                ->where('book_id', $book->id)
+                ->where('book_id', null)
                 ->where('payment_status', 'paid')
                 ->exists();
 
@@ -36,7 +36,7 @@ class StoreController extends Controller
                     'book_type' => $book->bookType->name ?? null,
                     'description' => $book->description ?? null,
                     'is_purchased' => UserPurchase::where('user_id', $user->id)
-                        ->where('book_id', null)
+                        ->where('book_id', $book->id)
                         ->where('payment_status', 'paid')
                         ->exists(),
                 ];
