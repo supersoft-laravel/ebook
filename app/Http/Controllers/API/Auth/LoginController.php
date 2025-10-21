@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserDevice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -21,6 +22,7 @@ class LoginController extends Controller
         $rules = [
             'email' => 'required|max:50',
             'password' => 'required',
+            'fcm_token' => 'nullable|string'
         ];
 
         // If Captcha is enabled, validate captcha response
@@ -56,6 +58,22 @@ class LoginController extends Controller
                 if (Hash::check($request->password, $userfind->password)) {
                     // Generate a new Sanctum token for the user
                     $token = $userfind->createToken($userfind->name, ['auth_token'])->plainTextToken;
+
+                    if($request->fcm_token){
+                        // 🔥 Delete existing same FCM token (if assigned to another user)
+                        UserDevice::where('fcm_token', $request->fcm_token)
+                            ->where('user_id', '!=', $userfind->id)
+                            ->delete();
+                            
+                        UserDevice::updateOrCreate(
+                            [
+                                'user_id' => $userfind->id,
+                            ],
+                            [
+                                'fcm_token' => $request->fcm_token,
+                            ]
+                        );
+                    }
 
                     return response()->json([
                         'message' => 'Login successfully!',

@@ -3,7 +3,10 @@
 namespace App\Providers;
 
 use App\Events\NotificationEvent;
+use App\Helpers\FirebaseHelper;
 use App\Models\Notification;
+use App\Models\UserDevice;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
 class NotificationServiceProvider extends ServiceProvider
@@ -26,7 +29,26 @@ class NotificationServiceProvider extends ServiceProvider
                             'table_id' => $tableId,
                             'page' => $page,
                         ]);
-                        // broadcast(new NotificationEvent($notification));
+                        // Get FCM token
+                        $userDevice = UserDevice::where('user_id', $user->id)->first();
+                        if (!$userDevice || !$userDevice->fcm_token) {
+                            continue;
+                        }
+
+                        $fcmToken = $userDevice->fcm_token;
+
+                        // Send via Firebase
+                        $data = [
+                            'notification_id' => (string) $notification->id,
+                            'table_name' => $tableName,
+                            'table_id' => (string) $tableId,
+                        ];
+
+                        $response = FirebaseHelper::sendNotification($fcmToken, $title, $message, $data);
+
+                        if (isset($response['error'])) {
+                            Log::warning("FCM send failed for user {$user->id}: " . json_encode($response));
+                        }
                     }
                 }
             };
