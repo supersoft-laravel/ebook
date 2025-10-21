@@ -11,7 +11,7 @@ class FirebaseHelper
     public static function sendNotification($fcmToken, $title, $body, $data = [])
     {
         $projectId = config('services.fcm.project_id');
-        $keyPath = public_path('centennial-da9a3-firebase-adminsdk-fbsvc-35538a9fd1.json');
+        $keyPath = public_path('e-book-972c1-firebase-adminsdk-fbsvc-8f167832d9.json');
 
         $credentials = new ServiceAccountCredentials(
             ['https://www.googleapis.com/auth/firebase.messaging'],
