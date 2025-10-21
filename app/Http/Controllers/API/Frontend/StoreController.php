@@ -161,4 +161,34 @@ class StoreController extends Controller
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    public function getPurchaseHistory(Request $request)
+    {
+        try {
+            $user = $request->user();
+            // Check if purchased
+            $purchases = UserPurchase::with('book','billing')->where('user_id', $user->id)
+                ->get();
+
+            $data = $purchases->map(function ($purchase) {
+                return [
+                    'id' => $purchase->id,
+                    'payment_type' => $purchase->payment_type,
+                    'amount' => $purchase->amount,
+                    'payment_status' => $purchase->payment_status,
+                    'book' => $purchase->book ?? null,
+                    'purchase_date' => $purchase->created_at->format('M d, Y'),
+                ];
+            });
+
+            return response()->json([
+                'purchases' => $data,
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            Log::error('API get purchase history failed', ['error' => $th->getMessage()]);
+            return response()->json([
+                'message' => 'Something went wrong!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

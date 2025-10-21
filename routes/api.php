@@ -43,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/store', [StoreController::class, 'getStore']);
     Route::get('/user/checkout', [StoreController::class, 'checkout']);
     Route::post('/user/submit-checkout', [StoreController::class, 'checkoutSubmit']);
+    Route::get('/user/purchase-history', [StoreController::class, 'getPurchaseHistory']);
 
     //Profile apis
     Route::get('/user/profile', [ProfileController::class, 'getProfile']);
