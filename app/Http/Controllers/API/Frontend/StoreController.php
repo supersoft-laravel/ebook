@@ -145,6 +145,8 @@ class StoreController extends Controller
             $order->order_no = 'ORD-' . date('Y') . '-' . str_pad($order->id, 3, '0', STR_PAD_LEFT);
             $order->save();
 
+            app('notificationService')->notifyUsers([$user], 'Order Confirmed', "Order #{$order->order_no} has been confirmed.");
+
             DB::commit();
 
             return response()->json([

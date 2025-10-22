@@ -45,6 +45,7 @@ class BookLawController extends Controller
     {
         try {
             $userId = $request->user()->id;
+            $user = $request->user();
 
             // ✅ Use helper function
             if (!$this->userCanAccessLaw($userId, $id)) {
@@ -58,15 +59,21 @@ class BookLawController extends Controller
                 ->where('book_law_id', $id)
                 ->first();
 
+            $bookLaw = BookLaw::with('book')->find($id);
+
             if ($userFavourite) {
                 $userFavourite->delete();
                 $message = 'Law removed from favourites successfully!';
+
+                app('notificationService')->notifyUsers([$user], 'Removed from Favourite', "Law #{$bookLaw->id} of book {$bookLaw->book->name} has been removed from your favourites");
             } else {
                 $userFavourite = new UserFavourite();
                 $userFavourite->user_id = $userId;
                 $userFavourite->book_law_id = $id;
                 $userFavourite->save();
                 $message = 'Law added to favourites successfully!';
+
+                app('notificationService')->notifyUsers([$user], 'Added to Favourite', "Law #{$bookLaw->id} of book {$bookLaw->book->name} has been added to your favourites");
             }
 
             return response()->json([
@@ -84,6 +91,7 @@ class BookLawController extends Controller
     {
         try {
             $userId = $request->user()->id;
+            $user = $request->user();
 
             // ✅ Use helper to ensure law is accessible
             if (!$this->userCanAccessLaw($userId, $id)) {
@@ -104,7 +112,11 @@ class BookLawController extends Controller
                 $userRead->book_law_id = $id;
                 $userRead->save();
                 $message = 'Law marked as read successfully!';
+
+                $bookLaw = BookLaw::with('book')->find($id);
+                app('notificationService')->notifyUsers([$user], 'Marked as Read', "Law #{$bookLaw->id} of book {$bookLaw->book->name} has been marked as read.");
             }
+
 
             return response()->json([
                 'message' => $message

@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class BookLaw extends Model
 {
     use HasFactory;
+
+    public function book()
+    {
+        return $this->belongsTo(Book::class, 'book_id');
+    }
 }
