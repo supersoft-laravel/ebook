@@ -48,11 +48,11 @@ class BookLawController extends Controller
             $user = $request->user();
 
             // ✅ Use helper function
-            if (!$this->userCanAccessLaw($userId, $id)) {
-                return response()->json([
-                    'message' => 'You cannot favourite this law without purchase.'
-                ], Response::HTTP_FORBIDDEN);
-            }
+            // if (!$this->userCanAccessLaw($userId, $id)) {
+            //     return response()->json([
+            //         'message' => 'You cannot favourite this law without purchase.'
+            //     ], Response::HTTP_FORBIDDEN);
+            // }
 
             // Toggle favourite
             $userFavourite = UserFavourite::where('user_id', $userId)
@@ -94,11 +94,11 @@ class BookLawController extends Controller
             $user = $request->user();
 
             // ✅ Use helper to ensure law is accessible
-            if (!$this->userCanAccessLaw($userId, $id)) {
-                return response()->json([
-                    'message' => 'You cannot mark this law as read without purchase.'
-                ], Response::HTTP_FORBIDDEN);
-            }
+            // if (!$this->userCanAccessLaw($userId, $id)) {
+            //     return response()->json([
+            //         'message' => 'You cannot mark this law as read without purchase.'
+            //     ], Response::HTTP_FORBIDDEN);
+            // }
 
             $userRead = UserRead::where('user_id', $userId)
                 ->where('book_law_id', $id)

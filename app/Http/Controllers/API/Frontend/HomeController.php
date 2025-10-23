@@ -45,19 +45,19 @@ class HomeController extends Controller
             // ])->exists();
 
             // If purchased → random from all laws
-            if ($isPurchased) {
+            // if ($isPurchased) {
                 $lawOfTheDay = $book->bookLaws()->inRandomOrder()->first();
-            } else {
-                $freeLawIds = $book->bookLaws()
-                    ->orderBy('id')
-                    ->limit($book->free_laws)
-                    ->pluck('id');
+            // } else {
+            //     $freeLawIds = $book->bookLaws()
+            //         ->orderBy('id')
+            //         ->limit($book->free_laws)
+            //         ->pluck('id');
 
-                $lawOfTheDay = $book->bookLaws()
-                    ->whereIn('id', $freeLawIds)
-                    ->inRandomOrder()
-                    ->first();
-            }
+            //     $lawOfTheDay = $book->bookLaws()
+            //         ->whereIn('id', $freeLawIds)
+            //         ->inRandomOrder()
+            //         ->first();
+            // }
 
             // Check if the selected law is in favourites
             $isFavourite = $lawOfTheDay
