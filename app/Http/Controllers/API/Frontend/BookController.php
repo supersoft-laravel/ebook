@@ -69,9 +69,9 @@ class BookController extends Controller
             $query = BookLaw::where('book_id', $book->id)
                 ->select('id', 'book_id', 'title', 'content');
 
-            if (!$isPurchased) {
-                $query->limit($book->free_laws);
-            }
+            // if (!$isPurchased) {
+            //     $query->limit($book->free_laws);
+            // }
 
             $laws = $query->get()->map(function ($law) use ($favouriteLawIds, $readLawIds) {
                 return [
