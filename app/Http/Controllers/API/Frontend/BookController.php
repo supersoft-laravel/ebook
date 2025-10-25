@@ -69,6 +69,13 @@ class BookController extends Controller
             $query = BookLaw::where('book_id', $book->id)
                 ->select('id', 'book_id', 'title', 'content');
 
+            // Apply user read mode
+            if ($user->read_mode === 'sequential') {
+                $query->orderBy('id', 'asc');
+            } else {
+                $query->inRandomOrder();
+            }
+
             // if (!$isPurchased) {
             //     $query->limit($book->free_laws);
             // }

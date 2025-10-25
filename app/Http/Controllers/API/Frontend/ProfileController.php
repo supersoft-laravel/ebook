@@ -118,4 +118,40 @@ class ProfileController extends Controller
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    public function updateReadMode(Request $request, $read_mode)
+    {
+        try {
+            // ✅ Validate read_mode
+            if (!in_array($read_mode, ['sequential', 'shuffle'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid read mode. Allowed values are "sequential" or "shuffle".',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            DB::beginTransaction();
+
+            $user = $request->user();
+            $user->read_mode = $read_mode;
+            $user->save();
+
+            app('notificationService')->notifyUsers([$user], 'Read Mode Updated', "Your reading mode has been updated to {$read_mode}.");
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Read Mode updated successfully',
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('API ReadMode Update failed', ['error' => $th->getMessage()]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong!',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

@@ -48,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Profile apis
     Route::get('/user/profile', [ProfileController::class, 'getProfile']);
     Route::post('/user/profile-image/store', [ProfileController::class, 'updateProfilePicture']);
+    Route::get('/user/update-read-mode/{mode}', [ProfileController::class, 'updateReadMode']);
 
     //Notification apis
     Route::get('/user/notifications', [NotificationController::class, 'getUserNotifications']);
