@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('provider')->nullable();
             $table->string('provider_id')->nullable();
             $table->string('forget_pass_otp')->nullable();
+            $table->enum('read_mode', ['shuffle', 'sequential'])->default('sequential');
             $table->timestamps();
             $table->softDeletes(); // This adds the 'deleted_at' column
         });
