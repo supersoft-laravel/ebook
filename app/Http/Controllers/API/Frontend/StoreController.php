@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class StoreController extends Controller
@@ -35,7 +36,7 @@ class StoreController extends Controller
                     'price' => $book->price,
                     'amazon_link' => $book->amazon_link ?? null,
                     'book_type' => $book->bookType->name ?? null,
-                    'description' => $book->description ?? null,
+                    'description' => $book->description ? Str::limit($book->description, 20, '...') : null,
                     'image' => url($book->image) ?? null,
                     'is_purchased' => UserPurchase::where('user_id', $user->id)
                         ->where('book_id', $book->id)
