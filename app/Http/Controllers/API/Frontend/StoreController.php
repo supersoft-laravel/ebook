@@ -33,8 +33,10 @@ class StoreController extends Controller
                     'title' => $book->title,
                     'slug' => $book->slug,
                     'price' => $book->price,
+                    'amazon_link' => $book->amazon_link ?? null,
                     'book_type' => $book->bookType->name ?? null,
                     'description' => $book->description ?? null,
+                    'image' => url($book->image) ?? null,
                     'is_purchased' => UserPurchase::where('user_id', $user->id)
                         ->where('book_id', $book->id)
                         ->where('payment_status', 'paid')

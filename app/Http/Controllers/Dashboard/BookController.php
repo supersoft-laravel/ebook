@@ -57,6 +57,7 @@ class BookController extends Controller
             'title' => 'required|string|max:255',
             'slug' => 'required|unique:books,slug',
             'author' => 'nullable|string|max:255',
+            'amazon_link' => 'nullable|url',
             'publication_year' => 'nullable|date',
             'isbn' => 'nullable|string|max:255',
             'price' => 'required|numeric|min:0',
@@ -77,6 +78,7 @@ class BookController extends Controller
             $book->title = $request->title;
             $book->slug = $request->slug;
             $book->author = $request->author;
+            $book->amazon_link = $request->amazon_link;
             $book->publication_year = $request->publication_year;
             $book->isbn = $request->isbn;
             $book->price = $request->price;
@@ -157,6 +159,7 @@ class BookController extends Controller
             'title' => 'required|string|max:255',
             'slug' => 'required|unique:books,slug,'.$id,
             'author' => 'nullable|string|max:255',
+            'amazon_link' => 'nullable|url',
             'publication_year' => 'nullable|date',
             'isbn' => 'nullable|string|max:255',
             'price' => 'required|numeric|min:0',
@@ -177,6 +180,7 @@ class BookController extends Controller
             $book->title = $request->title;
             $book->slug = $request->slug;
             $book->author = $request->author;
+            $book->amazon_link = $request->amazon_link;
             $book->publication_year = $request->publication_year;
             $book->isbn = $request->isbn;
             $book->price = $request->price;

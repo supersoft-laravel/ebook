@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug');
             $table->string('author')->nullable();
+            $table->string('amazon_link')->nullable();
             $table->string('publication_year')->nullable();
             $table->text('description')->nullable();
             $table->string('isbn')->nullable();

@@ -141,6 +141,16 @@
                             @endif
                         </div>
                         <div class="mb-4 col-md-12">
+                            <label for="amazon_link" class="form-label">{{ __('Amazon Link') }}</label>
+                            <input class="form-control @error('amazon_link') is-invalid @enderror" type="url" id="amazon_link"
+                                name="amazon_link" placeholder="{{ __('Enter amazon link') }}" value="{{ old('amazon_link', $book->amazon_link) }}"/>
+                            @error('amazon_link')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+                        <div class="mb-4 col-md-12">
                             <label for="description" class="form-label">{{ __('Description') }}</label>
                             <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description"
                                 placeholder="{{ __('Enter description') }}" cols="30" rows="10">{{ old('description', $book->description) }}</textarea>

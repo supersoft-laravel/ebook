@@ -17,17 +17,19 @@ class BookController extends Controller
     public function allBooks(Request $request)
     {
         try {
-            $query = Book::withCount('bookLaws');
+            $book = Book::withCount('bookLaws')->first();
 
-            $books = $query->get()->map(function ($book) {
-                return [
-                    'id'             => $book->id,
-                    'title'          => $book->title,
-                    'author'         => $book->author,
-                    'price'          => $book->price,
-                    'laws_count'     => $book->book_laws_count,
+            $books = [];
+
+            if ($book) {
+                $books[] = [
+                    'id'         => $book->id,
+                    'title'      => $book->title,
+                    'author'     => $book->author,
+                    'price'      => $book->price,
+                    'laws_count' => $book->book_laws_count,
                 ];
-            });
+            }
 
             return response()->json([
                 'books' => $books,
@@ -37,6 +39,29 @@ class BookController extends Controller
             return response()->json(['message' => 'Something went wrong!'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+    // public function allBooks(Request $request)
+    // {
+    //     try {
+    //         $query = Book::withCount('bookLaws');
+
+    //         $books = $query->get()->map(function ($book) {
+    //             return [
+    //                 'id'             => $book->id,
+    //                 'title'          => $book->title,
+    //                 'author'         => $book->author,
+    //                 'price'          => $book->price,
+    //                 'laws_count'     => $book->book_laws_count,
+    //             ];
+    //         });
+
+    //         return response()->json([
+    //             'books' => $books,
+    //         ], Response::HTTP_OK);
+    //     } catch (\Throwable $th) {
+    //         Log::error('API All Books failed', ['error' => $th->getMessage()]);
+    //         return response()->json(['message' => 'Something went wrong!'], Response::HTTP_INTERNAL_SERVER_ERROR);
+    //     }
+    // }
 
     public function getLaws(Request $request, $id)
     {
