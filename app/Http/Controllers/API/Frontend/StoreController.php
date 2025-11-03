@@ -148,6 +148,22 @@ class StoreController extends Controller
             $order->order_no = 'ORD-' . date('Y') . '-' . str_pad($order->id, 3, '0', STR_PAD_LEFT);
             $order->save();
 
+            if($request->book_id){
+                $order = new UserPurchase();
+                $order->order_no = 'TEMP'; // temporary
+                $order->user_id = $user->id;
+                $order->billing_id = $billing->id;
+                $order->book_id = null;
+                $order->payment_type = $request->payment_type;
+                $order->amount = 0.00;
+                $order->payment_status = 'paid';
+                $order->save();
+
+                // ✅ Now generate real order number using the ID
+                $order->order_no = 'ORD-' . date('Y') . '-' . str_pad($order->id, 3, '0', STR_PAD_LEFT);
+                $order->save();
+            }
+
             app('notificationService')->notifyUsers([$user], 'Order Confirmed', "Order #{$order->order_no} has been confirmed.");
 
             DB::commit();
