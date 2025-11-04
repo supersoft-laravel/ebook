@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
+use Stripe\Stripe;
+use Stripe\Charge;
 
 class StoreController extends Controller
 {
@@ -108,6 +110,8 @@ class StoreController extends Controller
                 'payment_type' => 'required|in:card,paypal,stripe,cod,authorize.net',
                 'price' => 'required|string',
                 'book_id' => 'nullable|exists:books,id',
+                'payment_method' => 'required|in:card,paypal,stripe',
+                'stripeToken' => 'required_if:payment_method,stripe|nullable|string',
             ]);
 
             if ($validator->fails()) {
@@ -133,9 +137,43 @@ class StoreController extends Controller
                 ]
             );
 
-            // ✅ Create order with a temporary placeholder order_no (to satisfy NOT NULL)
+            if ($request->payment_method === 'stripe') {
+                Stripe::setApiKey(env('STRIPE_SECRET'));
+
+                try {
+                    $charge = Charge::create([
+                        'amount' => $request->price * 100, // Convert to cents
+                        'currency' => 'usd',
+                        'source' => $request->stripeToken,
+                        'description' => 'Payment for book ID: ' . $request->book_id,
+                        'receipt_email' => $request->email, // Billing email
+                        'metadata' => [
+                            'billing_first_name' => $request->firstname,
+                            'billing_last_name' => $request->lastname,
+                            'billing_email' => $request->email,
+                            'billing_phone' => $request->phone,
+                            'billing_address' => $request->address,
+                            'billing_city' => $request->city,
+                            'billing_state' => $request->state,
+                            'billing_zip' => $request->zip,
+                            'billing_country' => $request->country,
+                        ],
+                    ]);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    Log::error('Stripe Charge Failed', ['error' => $e->getMessage()]);
+                    return back()->with('error', 'Payment could not be processed: ' . $e->getMessage());
+                }
+
+                if ($charge->status !== 'succeeded') {
+                    DB::rollBack();
+                    Log::error('Stripe Payment Failed', ['charge' => $charge]);
+                    return back()->with('error', 'Payment failed. Please try again.');
+                }
+            }
+
             $order = new UserPurchase();
-            $order->order_no = 'TEMP'; // temporary
+            $order->order_no = 'TEMP';
             $order->user_id = $user->id;
             $order->billing_id = $billing->id;
             $order->book_id = $request->book_id;
@@ -144,13 +182,12 @@ class StoreController extends Controller
             $order->payment_status = 'paid';
             $order->save();
 
-            // ✅ Now generate real order number using the ID
             $order->order_no = 'ORD-' . date('Y') . '-' . str_pad($order->id, 3, '0', STR_PAD_LEFT);
             $order->save();
 
             if($request->book_id){
                 $order = new UserPurchase();
-                $order->order_no = 'TEMP'; // temporary
+                $order->order_no = 'TEMP';
                 $order->user_id = $user->id;
                 $order->billing_id = $billing->id;
                 $order->book_id = null;
@@ -159,7 +196,6 @@ class StoreController extends Controller
                 $order->payment_status = 'paid';
                 $order->save();
 
-                // ✅ Now generate real order number using the ID
                 $order->order_no = 'ORD-' . date('Y') . '-' . str_pad($order->id, 3, '0', STR_PAD_LEFT);
                 $order->save();
             }
