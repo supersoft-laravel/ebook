@@ -110,7 +110,6 @@ class StoreController extends Controller
                 'payment_type' => 'required|in:card,paypal,stripe,cod,authorize.net',
                 'price' => 'required|string',
                 'book_id' => 'nullable|exists:books,id',
-                'payment_method' => 'required|in:card,paypal,stripe',
                 'stripeToken' => 'required_if:payment_method,stripe|nullable|string',
             ]);
 
@@ -162,13 +161,19 @@ class StoreController extends Controller
                 } catch (\Exception $e) {
                     DB::rollBack();
                     Log::error('Stripe Charge Failed', ['error' => $e->getMessage()]);
-                    return back()->with('error', 'Payment could not be processed: ' . $e->getMessage());
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Payment could not be processed: ' . $e->getMessage(),
+                    ], Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
 
                 if ($charge->status !== 'succeeded') {
                     DB::rollBack();
                     Log::error('Stripe Payment Failed', ['charge' => $charge]);
-                    return back()->with('error', 'Payment failed. Please try again.');
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Payment failed. Please try again.',
+                    ], Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
             }
 
