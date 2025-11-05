@@ -191,7 +191,7 @@ class StoreController extends Controller
             $order->book_id = $request->book_id;
             $order->payment_type = $request->payment_type;
             $order->amount = $request->price;
-            $order->payment_status = 'paid';
+            $order->payment_status = $paymentStatus;
             $order->save();
 
             $order->order_no = 'ORD-' . date('Y') . '-' . str_pad($order->id, 3, '0', STR_PAD_LEFT);
@@ -205,7 +205,7 @@ class StoreController extends Controller
                 $order->book_id = null;
                 $order->payment_type = $request->payment_type;
                 $order->amount = 0.00;
-                $order->payment_status = 'paid';
+                $order->payment_status = $paymentStatus;
                 $order->save();
 
                 $order->order_no = 'ORD-' . date('Y') . '-' . str_pad($order->id, 3, '0', STR_PAD_LEFT);
