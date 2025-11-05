@@ -110,7 +110,7 @@ class StoreController extends Controller
                 'payment_type' => 'required|in:card,paypal,stripe,cod,authorize.net',
                 'price' => 'required|string',
                 'book_id' => 'nullable|exists:books,id',
-                'stripeToken' => 'required_if:payment_method,stripe|nullable|string',
+                'stripeToken' => 'required_if:payment_type,stripe|nullable|string',
             ]);
 
             if ($validator->fails()) {
@@ -136,7 +136,7 @@ class StoreController extends Controller
                 ]
             );
 
-            if ($request->payment_method === 'stripe') {
+            if ($request->payment_type === 'stripe') {
                 Stripe::setApiKey(env('STRIPE_SECRET'));
 
                 try {
