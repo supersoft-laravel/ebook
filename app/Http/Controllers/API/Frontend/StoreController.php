@@ -110,7 +110,7 @@ class StoreController extends Controller
                 'payment_type' => 'required|in:card,paypal,stripe,cod,authorize.net',
                 'price' => 'required|string',
                 'book_id' => 'nullable|exists:books,id',
-                'stripeToken' => 'required_if:payment_type,stripe|nullable|string',
+                // 'stripeToken' => 'required_if:payment_type,stripe|nullable|string',
             ]);
 
             if ($validator->fails()) {
@@ -136,45 +136,52 @@ class StoreController extends Controller
                 ]
             );
 
+            // if ($request->payment_type === 'stripe') {
+            //     Stripe::setApiKey(env('STRIPE_SECRET'));
+
+            //     try {
+            //         $charge = Charge::create([
+            //             'amount' => $request->price * 100, // Convert to cents
+            //             'currency' => 'usd',
+            //             'source' => $request->stripeToken,
+            //             'description' => 'Payment for book ID: ' . $request->book_id,
+            //             'receipt_email' => $request->email, // Billing email
+            //             'metadata' => [
+            //                 'billing_first_name' => $request->firstname,
+            //                 'billing_last_name' => $request->lastname,
+            //                 'billing_email' => $request->email,
+            //                 'billing_phone' => $request->phone,
+            //                 'billing_address' => $request->address,
+            //                 'billing_city' => $request->city,
+            //                 'billing_state' => $request->state,
+            //                 'billing_zip' => $request->zip,
+            //                 'billing_country' => $request->country,
+            //             ],
+            //         ]);
+            //     } catch (\Exception $e) {
+            //         DB::rollBack();
+            //         Log::error('Stripe Charge Failed', ['error' => $e->getMessage()]);
+            //         return response()->json([
+            //             'success' => false,
+            //             'message' => 'Payment could not be processed: ' . $e->getMessage(),
+            //         ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            //     }
+
+            //     if ($charge->status !== 'succeeded') {
+            //         DB::rollBack();
+            //         Log::error('Stripe Payment Failed', ['charge' => $charge]);
+            //         return response()->json([
+            //             'success' => false,
+            //             'message' => 'Payment failed. Please try again.',
+            //         ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            //     }
+            // }
             if ($request->payment_type === 'stripe') {
-                Stripe::setApiKey(env('STRIPE_SECRET'));
-
-                try {
-                    $charge = Charge::create([
-                        'amount' => $request->price * 100, // Convert to cents
-                        'currency' => 'usd',
-                        'source' => $request->stripeToken,
-                        'description' => 'Payment for book ID: ' . $request->book_id,
-                        'receipt_email' => $request->email, // Billing email
-                        'metadata' => [
-                            'billing_first_name' => $request->firstname,
-                            'billing_last_name' => $request->lastname,
-                            'billing_email' => $request->email,
-                            'billing_phone' => $request->phone,
-                            'billing_address' => $request->address,
-                            'billing_city' => $request->city,
-                            'billing_state' => $request->state,
-                            'billing_zip' => $request->zip,
-                            'billing_country' => $request->country,
-                        ],
-                    ]);
-                } catch (\Exception $e) {
-                    DB::rollBack();
-                    Log::error('Stripe Charge Failed', ['error' => $e->getMessage()]);
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Payment could not be processed: ' . $e->getMessage(),
-                    ], Response::HTTP_INTERNAL_SERVER_ERROR);
-                }
-
-                if ($charge->status !== 'succeeded') {
-                    DB::rollBack();
-                    Log::error('Stripe Payment Failed', ['charge' => $charge]);
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Payment failed. Please try again.',
-                    ], Response::HTTP_INTERNAL_SERVER_ERROR);
-                }
+                // No need to charge again, payment already done on frontend
+                $paymentStatus = 'paid';
+            } else {
+                // Handle other payment types if needed
+                $paymentStatus = 'pending';
             }
 
             $order = new UserPurchase();

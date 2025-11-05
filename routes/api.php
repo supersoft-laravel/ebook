@@ -8,6 +8,7 @@ use App\Http\Controllers\API\Frontend\BookController;
 use App\Http\Controllers\API\Frontend\BookLawController;
 use App\Http\Controllers\API\Frontend\HomeController;
 use App\Http\Controllers\API\Frontend\NotificationController;
+use App\Http\Controllers\API\Frontend\PaymentController;
 use App\Http\Controllers\API\Frontend\ProfileController;
 use App\Http\Controllers\API\Frontend\StoreController;
 use Illuminate\Http\Request;
@@ -56,6 +57,8 @@ Route::middleware('auth:sanctum')->group(function () {
     //book apis
     Route::get('/user/books', [BookController::class, 'allBooks']);
     Route::get('/user/books/{id}', [BookController::class, 'getLaws']);
+
+    Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
 
 });
 
