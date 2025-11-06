@@ -81,31 +81,21 @@ class BookController extends Controller
                 ->where('payment_status', 'paid')
                 ->exists();
 
-            // Fetch user favourites and reads for quick lookup
-            $favouriteLawIds = UserFavourite::where('user_id', $user->id)
-                ->pluck('book_law_id')
-                ->toArray();
+            Log::info('User purchase status', [
+                'user_id' => $user->id,
+                'book_id' => $book->id,
+                'is_purchased' => $isPurchased
+            ]);
 
-            $readLawIds = UserRead::where('user_id', $user->id)
-                ->pluck('book_law_id')
-                ->toArray();
-
-            // Build query for laws
-            $query = BookLaw::where('book_id', $book->id)
-                ->select('id', 'book_id', 'title', 'content');
-
-            // if (!$isPurchased) {
-            //     $query->limit($book->free_laws);
-            // }
-
-            // // Apply user read mode
-            // if ($user->read_mode === 'sequential') {
-            //     $query->orderBy('id', 'asc');
-            // } else {
-            //     $query->inRandomOrder();
-            // }
+            // Fetch favourites & reads
+            $favouriteLawIds = UserFavourite::where('user_id', $user->id)->pluck('book_law_id')->toArray();
+            $readLawIds = UserRead::where('user_id', $user->id)->pluck('book_law_id')->toArray();
 
             if ($isPurchased) {
+
+                $query = BookLaw::where('book_id', $book->id)
+                    ->select('id', 'book_id', 'title', 'content');
+
                 if ($user->read_mode === 'sequential') {
                     $query->orderBy('id', 'asc');
                 } else {
@@ -114,26 +104,34 @@ class BookController extends Controller
 
                 $laws = $query->get();
             } else {
-                // Free user
-                $lawsQuery = BookLaw::where('book_id', $book->id)
+                // FREE USER
+                $laws = BookLaw::where('book_id', $book->id)
                     ->select('id', 'book_id', 'title', 'content')
-                    ->get();
+                    ->orderBy('id', 'asc') // always get first X
+                    ->take($book->free_laws)
+                    ->get()
+                    ->toArray(); // convert to array
 
-                if ($user->read_mode === 'shuffle') {
-                    $laws = $lawsQuery->shuffle()->take($book->free_laws);
-                } else {
-                    $laws = $lawsQuery->sortBy('id')->take($book->free_laws);
+                if ($user->read_mode !== 'sequential') {
+                    Log::alert('Shuffling ONLY first free laws', [
+                        'user_id' => $user->id,
+                        'book_id' => $book->id
+                    ]);
+                    shuffle($laws); // shuffle only the first free_laws
                 }
+
+                $laws = collect($laws);
             }
 
-            $laws = $query->get()->map(function ($law) use ($favouriteLawIds, $readLawIds) {
+            // ✅ Map here only once!
+            $laws = $laws->map(function ($law) use ($favouriteLawIds, $readLawIds) {
                 return [
-                    'id'           => $law->id,
-                    'book_id'      => $law->book_id,
-                    'title'        => $law->title,
-                    'content'      => $law->content,
-                    'is_favourite' => in_array($law->id, $favouriteLawIds),
-                    'is_read'      => in_array($law->id, $readLawIds), // ✅ added here
+                    'id'           => $law['id'] ?? $law->id,
+                    'book_id'      => $law['book_id'] ?? $law->book_id,
+                    'title'        => $law['title'] ?? $law->title,
+                    'content'      => $law['content'] ?? $law->content,
+                    'is_favourite' => in_array($law['id'] ?? $law->id, $favouriteLawIds),
+                    'is_read'      => in_array($law['id'] ?? $law->id, $readLawIds),
                 ];
             });
 
