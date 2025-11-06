@@ -119,7 +119,7 @@ class BookController extends Controller
                     ->select('id', 'book_id', 'title', 'content')
                     ->get();
 
-                if ($user->read_mode === 'random') {
+                if ($user->read_mode === 'shuffle') {
                     $laws = $lawsQuery->shuffle()->take($book->free_laws);
                 } else {
                     $laws = $lawsQuery->sortBy('id')->take($book->free_laws);
