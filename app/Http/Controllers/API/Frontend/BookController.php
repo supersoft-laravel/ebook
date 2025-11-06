@@ -136,6 +136,7 @@ class BookController extends Controller
             });
 
             return response()->json([
+                'is_purchased' => $isPurchased,
                 'laws' => $laws
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
