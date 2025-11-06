@@ -94,15 +94,36 @@ class BookController extends Controller
             $query = BookLaw::where('book_id', $book->id)
                 ->select('id', 'book_id', 'title', 'content');
 
-            if (!$isPurchased) {
-                $query->limit($book->free_laws);
-            }
+            // if (!$isPurchased) {
+            //     $query->limit($book->free_laws);
+            // }
 
-            // Apply user read mode
-            if ($user->read_mode === 'sequential') {
-                $query->orderBy('id', 'asc');
+            // // Apply user read mode
+            // if ($user->read_mode === 'sequential') {
+            //     $query->orderBy('id', 'asc');
+            // } else {
+            //     $query->inRandomOrder();
+            // }
+
+            if ($isPurchased) {
+                if ($user->read_mode === 'sequential') {
+                    $query->orderBy('id', 'asc');
+                } else {
+                    $query->inRandomOrder();
+                }
+
+                $laws = $query->get();
             } else {
-                $query->inRandomOrder();
+                // Free user
+                $lawsQuery = BookLaw::where('book_id', $book->id)
+                    ->select('id', 'book_id', 'title', 'content')
+                    ->get();
+
+                if ($user->read_mode === 'random') {
+                    $laws = $lawsQuery->shuffle()->take($book->free_laws);
+                } else {
+                    $laws = $lawsQuery->sortBy('id')->take($book->free_laws);
+                }
             }
 
             $laws = $query->get()->map(function ($law) use ($favouriteLawIds, $readLawIds) {
