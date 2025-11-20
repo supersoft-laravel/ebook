@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Privacy Policy - Face 2 Face</title>
+    <title>@yield('title') - Face 2 Face</title>
     @include('layouts.meta')
     @include('layouts.css')
     <style>
