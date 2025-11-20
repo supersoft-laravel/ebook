@@ -161,6 +161,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // Frontend Pages Routes
 Route::name('frontend.')->group(function () {
 Route::get('privacy-policy', [FrontendHomeController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('delete-account', [FrontendHomeController::class, 'deleteAccount'])->name('delete-account');
+Route::post('delete-account-request', [FrontendHomeController::class, 'deleteAccountRequest'])->name('delete-account-request');
+
 });
 
 
