@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Dashboard\BookController;
 use App\Http\Controllers\Dashboard\HomeController;
+use App\Http\Controllers\Frontend\HomeController as FrontendHomeController;
 use App\Http\Controllers\Dashboard\NotificationController;
 use App\Http\Controllers\Dashboard\ProfileController;
 use App\Http\Controllers\Dashboard\RolePermission\PermissionController;
@@ -159,7 +160,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // Frontend Pages Routes
 Route::name('frontend.')->group(function () {
-
+Route::get('privacy-policy', [FrontendHomeController::class, 'privacyPolicy'])->name('privacy-policy');
 });
 
 
